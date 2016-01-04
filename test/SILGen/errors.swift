@@ -1,4 +1,4 @@
-// RUN: %target-swift-frontend -parse-stdlib -emit-silgen -verify %s | FileCheck %s
+// RUN: %target-swift-frontend -use-native-super-method -parse-stdlib -emit-silgen -verify %s | FileCheck %s
 
 import Swift
 
@@ -222,7 +222,7 @@ struct DoomedStruct : Doomed {
 // CHECK:      [[TEMP:%.*]] = alloc_stack $DoomedClass
 // CHECK:      copy_addr %0 to [initialization] [[TEMP]]#1
 // CHECK:      [[SELF:%.*]] = load [[TEMP]]#1 : $*DoomedClass
-// CHECK:      [[T0:%.*]] = class_method [[SELF]] : $DoomedClass, #DoomedClass.check!1 : DoomedClass -> () throws -> () , $@convention(method) (@guaranteed DoomedClass) -> @error ErrorType
+// CHECK:      [[T0:%.*]] = class_method [[SELF]] : $DoomedClass, #DoomedClass.check!1 : (DoomedClass) -> () throws -> () , $@convention(method) (@guaranteed DoomedClass) -> @error ErrorType
 // CHECK-NEXT: try_apply [[T0]]([[SELF]])
 // CHECK:    bb1([[T0:%.*]] : $()):
 // CHECK:      strong_release [[SELF]] : $DoomedClass
@@ -253,7 +253,7 @@ struct HappyStruct : Doomed {
 // CHECK:      [[TEMP:%.*]] = alloc_stack $HappyClass
 // CHECK:      copy_addr %0 to [initialization] [[TEMP]]#1
 // CHECK:      [[SELF:%.*]] = load [[TEMP]]#1 : $*HappyClass
-// CHECK:      [[T0:%.*]] = class_method [[SELF]] : $HappyClass, #HappyClass.check!1 : HappyClass -> () -> () , $@convention(method) (@guaranteed HappyClass) -> ()
+// CHECK:      [[T0:%.*]] = class_method [[SELF]] : $HappyClass, #HappyClass.check!1 : (HappyClass) -> () -> () , $@convention(method) (@guaranteed HappyClass) -> ()
 // CHECK:      [[T1:%.*]] = apply [[T0]]([[SELF]])
 // CHECK:      strong_release [[SELF]] : $HappyClass
 // CHECK:      dealloc_stack [[TEMP]]#0
@@ -465,8 +465,7 @@ class BaseThrowingInit : HasThrowingInit {
 //   Super delegation.
 // CHECK-NEXT: [[T0:%.*]] = load [[MARKED_BOX]]
 // CHECK-NEXT: [[T2:%.*]] = upcast [[T0]] : $BaseThrowingInit to $HasThrowingInit
-// CHECK-NEXT: function_ref
-// CHECK-NEXT: [[T3:%.*]] = function_ref @_TFC6errors15HasThrowingInitc
+// CHECK-NEXT: [[T3:%[0-9]+]] = super_method [[T0]] : $BaseThrowingInit, #HasThrowingInit.init!initializer.1
 // CHECK-NEXT: apply [[T3]](%0, [[T2]])
 
 // Cleanups for writebacks.
